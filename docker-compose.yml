@@ -1,0 +1,22 @@
+services:
+  ml-app:
+    build: .
+    container_name: finam_hack_container
+    shm_size: '10g'
+    volumes:
+      - ./ozon-services:/code
+      - ./data:/code/data
+    working_dir: /code
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    init: true
