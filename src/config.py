@@ -55,6 +55,18 @@ DENSE_UNITS = 32
 # Количество фолдов для временной кросс-валидации
 N_SPLITS_LSTM = 5 
 
+# --- Параметры модели Transformer ---
+TRANSFORMER_MODEL_PATH = os.path.join(MODEL_DIR, 'transformer_model.pth')
+
+# d_model: Размерность эмбеддингов внутри трансформера. Должна быть делимой на n_heads.
+D_MODEL = 128
+# n_heads: Количество "голов" в механизме multi-head attention.
+N_HEADS = 8
+# num_encoder_layers: Количество слоев кодировщика.
+NUM_ENCODER_LAYERS = 3
+# dropout: Вероятность dropout.
+DROPOUT = 0.1
+
 # --- Параметры признаков ---
 TARGET_COLUMN = 'target_price' # TODO: Заменить на реальное название целевой переменной
 # Сюда можно будет добавить список категориальных признаков, если они появятся
