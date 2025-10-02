@@ -6,3 +6,5 @@ matplotlib
 seaborn
 jupyterlab
 python-dotenv
+torch
+tqdm
