@@ -4,8 +4,7 @@ services:
     container_name: finam_hack_container
     shm_size: '10g'
     volumes:
-      - ./ozon-services:/code
-      - ./data:/code/data
+      - ./:/code
     working_dir: /code
     environment:
       - PYTHONUNBUFFERED=1
