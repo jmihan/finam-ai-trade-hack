@@ -8,3 +8,5 @@ jupyterlab
 python-dotenv
 torch
 tqdm
+pyarrow
+pandas_ta
