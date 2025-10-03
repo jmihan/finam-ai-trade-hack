@@ -1,0 +1,43 @@
+import os
+import torch
+import logging
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# --- НАСТРОЙКИ ФАЙЛОВ ДАННЫХ ---
+TRAIN_CANDLES_PATH = 'train_candles.csv'
+TEST_NEWS_PATH = 'test_news.csv'
+FINAL_FEATURES_FILENAME = 'features_news.parquet'
+
+# --- НАСТРОЙКИ КЭШИРОВАНИЯ ---
+TICKER_MATCH_CACHE_FILENAME = 'ticker_matches_cache.parquet'
+QUANT_FEATURES_CACHE_FILENAME = 'quant_features_cache.parquet'
+TINYBERT_EMBEDDINGS_CACHE_FILENAME = 'tinybert_embeddings_cache.parquet'
+EMOBERT_FEATURES_CACHE_FILENAME = 'emobert_features_cache.parquet'
+
+SAVE_INTERVAL = 500 # Сохранять кэш каждые N батчей для моделей
+
+# --- НАСТРОЙКИ МОДЕЛЕЙ (ЛОКАЛЬНЫЕ ПУТИ) ---
+MODELS_DIR = "C:/Users/nikit/Desktop/models" # Базовая директория для моделей
+TINYBERT_MODEL_NAME = os.path.join(MODELS_DIR, "bert-tiny")
+EMOBERT_MODEL_NAME = os.path.join(MODELS_DIR, "emobert")
+
+# --- НАСТРОЙКИ УСТРОЙСТВА И БАТЧА ---
+BATCH_SIZE = 4 # ОЧЕНЬ ВАЖНО: Подберите это значение для вашей GTX 1060 3GB.
+              # Начните с 4, если получаете CUDA OOM, уменьшите до 2 или 1.
+              # Если все равно не работает, переключите модель на CPU.
+
+def get_device():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logging.info(f"Используется устройство: {device}")
+    if device.type == 'cuda':
+        vram = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        logging.info(f"GPU: {torch.cuda.get_device_name(0)}, VRAM: {vram:.2f} GB")
+        if vram < 3: # Если VRAM меньше 3GB, переключаемся на CPU
+            logging.warning("Обнаружен GPU, но VRAM < 3GB. Производительность может быть нестабильной, возможно придется переключиться на CPU или уменьшить BATCH_SIZE.")
+            device = torch.device("cpu") # Принудительно переключаем на CPU
+            logging.info(f"Переключено на CPU из-за недостатка VRAM. Используется устройство: {device}")
+    return device
+
+DEVICE = get_device()
