@@ -24,9 +24,8 @@ TINYBERT_MODEL_NAME = os.path.join(MODELS_DIR, "bert-tiny")
 EMOBERT_MODEL_NAME = os.path.join(MODELS_DIR, "emobert")
 
 # --- НАСТРОЙКИ УСТРОЙСТВА И БАТЧА ---
-BATCH_SIZE = 4 # ОЧЕНЬ ВАЖНО: Подберите это значение для вашей GTX 1060 3GB.
-              # Начните с 4, если получаете CUDA OOM, уменьшите до 2 или 1.
-              # Если все равно не работает, переключите модель на CPU.
+BATCH_SIZE = 4 
+
 
 def get_device():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
