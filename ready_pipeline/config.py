@@ -71,3 +71,4 @@ EARLY_STOPPING_PATIENCE = 5
 # --- 9. Пути для сохранения финальной модели и артефактов ---
 PATCHTST_MODEL_PATH = MODELS_DIR / 'patchtst_final_model'
 PATCHTST_PREPROCESSOR_PATH = ARTIFACTS_DIR / 'patchtst_preprocessor.pkl'
+SUBMISSION_PATH = ROOT_DIR / 'submission.csv'

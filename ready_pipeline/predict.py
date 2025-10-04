@@ -108,27 +108,109 @@ def run_prediction():
     results_list = []
     tickers_in_order = sorted(df_inference['ticker'].unique())
     
+    logging.info("--- Шаг 4/4: ГЛУБОКАЯ ОТЛАДКА РЕЗУЛЬТАТОВ ---")
+    
+    predictions_tuple = predictions_output.predictions
+
+    # # --- БЛОК ДЛЯ ГЛУБОКОЙ ОТЛАДКИ ---
+    # print("\n" + "="*20 + " НАЧАЛО ОТЛАДКИ " + "="*20)
+    
+    # print(f"Тип predictions_output.predictions: {type(predictions_tuple)}")
+    
+    # # Проверяем, действительно ли это кортеж
+    # if isinstance(predictions_tuple, tuple):
+    #     print(f"Длина кортежа (количество элементов): {len(predictions_tuple)}")
+        
+    #     print("\n--- Анализ каждого элемента в кортеже ---")
+    #     for idx, element in enumerate(predictions_tuple):
+    #         print(f"\n--- Элемент #{idx} ---")
+    #         print(f"Тип элемента: {type(element)}")
+            
+    #         # Если элемент - это массив NumPy, выводим его форму
+    #         if isinstance(element, np.ndarray):
+    #             print(f"Форма элемента: {element.shape}")
+    #         else:
+    #             # Если это не массив, просто выводим его
+    #             print(f"Содержимое элемента: {element}")
+    # else:
+    #     # Если это не кортеж, выводим информацию о том, что это
+    #     print("Объект predictions_output.predictions не является кортежем.")
+    #     if isinstance(predictions_tuple, np.ndarray):
+    #         print(f"Это массив NumPy с формой: {predictions_tuple.shape}")
+
+    # print("\n" + "="*20 + " КОНЕЦ ОТЛАДКИ " + "="*20)
+    
+    # # Прерываем выполнение, чтобы изучить вывод
+    # logging.info("Отладка завершена. Прерываю выполнение.")
+    # sys.exit()
+
+
+    # 4. Форматирование и сохранение результата
+    logging.info("--- Шаг 4/4: Форматирование и сохранение результатов ---")
+    
+    # --- ГЛАВНОЕ ИСПРАВЛЕНИЕ НА ОСНОВЕ ОТЛАДКИ ---
+    # 1. Берем ЭЛЕМЕНТ #1 из кортежа - это тензор (19, 20, 366)
+    predictions_for_all_channels = predictions_output.predictions[1]
+    
+    # 2. Вырезаем из него предсказания только для наших 20 целевых переменных (первые 20 каналов)
+    # Получаем тензор (19, 20, 20)
+    predictions_raw = predictions_for_all_channels[:, :, :PREDICTION_LENGTH]
+
+    last_known_date = df_full['date'].max()
+    prediction_dates = pd.bdate_range(start=last_known_date + pd.Timedelta(days=1), periods=PREDICTION_LENGTH)
+    
+    results_list = []
+    tickers_in_order = sorted(df_inference['ticker'].unique())
+    
     for i, ticker in enumerate(tickers_in_order):
-        # ВАЖНО: trainer.predict() возвращает предсказания в отсортированном по id_columns порядке
-        ticker_predictions = predictions_raw[i] 
+        # predictions_raw[i] - это матрица (20, 20) для одного тикера
+        prediction_matrix_for_ticker = predictions_raw[i]
+        
+        # Берем главную диагональ этой матрицы
+        diagonal_predictions = np.diag(prediction_matrix_for_ticker)
+        
         for j in range(PREDICTION_LENGTH):
             results_list.append({
                 'ticker': ticker,
                 'date': prediction_dates[j],
-                'predicted_return': ticker_predictions[j]
+                'predicted_return': diagonal_predictions[j]
             })
             
-    df_results = pd.DataFrame(results_list)
+    df_long = pd.DataFrame(results_list)
     
-    # Фильтруем до 28 сентября включительно
     final_end_date = pd.to_datetime('2025-09-28') # Укажите корректный год из ваших данных
-    df_results = df_results[df_results['date'] <= final_end_date]
+    df_long = df_long[df_long['date'] <= final_end_date]
     
-    output_path = ARTIFACTS_DIR / 'predictions.csv'
-    df_results.to_csv(output_path, index=False)
+    # --- НОВЫЙ БЛОК: ТРАНСФОРМАЦИЯ В ФОРМАТ SUBMISSION ---
+    logging.info("--- Преобразование предсказаний в формат submission ---")
     
-    logging.info(f"\n Предсказания успешно сохранены в: {output_path}")
-    logging.info(f"Пример предсказаний:\n{df_results.head().to_string()}")
+    # 1. Создаем колонку с номером предсказания (p1, p2, ...)
+    # groupby().cumcount() создает счетчик для каждого тикера (0, 1, 2...)
+    df_long['p_col_num'] = df_long.groupby('ticker').cumcount() + 1
+    df_long['p_col'] = 'p' + df_long['p_col_num'].astype(str)
+    
+    # 2. Используем pivot для преобразования из "длинного" формата в "широкий"
+    df_submission = df_long.pivot(
+        index='ticker', 
+        columns='p_col', 
+        values='predicted_return'
+    )
+    
+    # 3. Приводим в порядок колонки
+    # Убедимся, что колонки идут в правильном порядке (p1, p2, ..., p20)
+    p_columns_ordered = [f'p{i}' for i in range(1, PREDICTION_LENGTH + 1)]
+    # Оставляем только те колонки, которые есть в нашем датафрейме
+    p_columns_to_use = [col for col in p_columns_ordered if col in df_submission.columns]
+    
+    df_submission = df_submission[p_columns_to_use]
+    
+    # Сбрасываем индекс, чтобы 'ticker' стал обычной колонкой
+    df_submission.reset_index(inplace=True)
+    
+    df_submission.to_csv(SUBMISSION_PATH, index=False)
+    
+    logging.info(f"\n Финальный submission-файл успешно сохранен в: {SUBMISSION_PATH}")
+    logging.info(f"Пример submission-файла:\n{df_submission.head().to_string()}")
 
 
 if __name__ == '__main__':
