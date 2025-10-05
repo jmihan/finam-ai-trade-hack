@@ -1,5 +1,5 @@
 services:
-  ml-app:
+  finam:
     build: .
     container_name: finam_hack_container
     shm_size: '10g'

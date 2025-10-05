@@ -16,3 +16,11 @@ env/
 
 .ipynb_checkpoints/
 catboost_info/
+finam-x-hse-trade-ai-hack-forecast-main/
+artifacts/
+checkpoints/
+*.csv
+*.png
+*.parquet
+*.pptx
+*.docx
