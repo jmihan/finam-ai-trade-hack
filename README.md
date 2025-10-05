@@ -1,3 +1,111 @@
-FINAM HACK
-Решение находится в ветке ensemble. От туда нужна только папка ready_pipeline. Внутри этой папки нужно создать папки data и models. Внутри папки data создать ещё две папки raw и processed. Внутрь папки положить candles.csv и news.csv. Там должны быть записи по 8 сентября включительно (если смотреть на текущее задание). Далее в папке models создать папку rubert-tiny-sentiment-balanced и положить туда все исходники предобученной модели (скачать можно по ссылке: https://huggingface.co/cointegrated/rubert-tiny-sentiment-balanced/tree/main). После этого всё готово к запуску. Нужно запустить main.py скрипт (либо из папки ready_pipeline либо из папки на уровень выше, я у себя запускал из коренной папки) командой 'python main.py'. В папке ready_pipeline появится submission.csv)
-Версия Python 3.11.0. Все зависимости указаны в requirements.txt. Модель PatchTST нужно установить отдельно командой 'pip install git+https://github.com/IBM/tsfm.git'. 
+
+---
+
+# FINAM HACK — Решение команды
+
+## Структура проекта
+
+Решение находится в ветке **`ensemble`**.
+Из этой ветки необходима только папка **`ready_pipeline`**.
+
+После клонирования репозитория создайте следующую структуру директорий внутри `ready_pipeline`:
+
+```
+ready_pipeline/
+├── data/
+│   ├── raw/
+│   │   ├── candles.csv
+│   │   └── news.csv
+│   └── processed/
+├── models/
+│   └── rubert-tiny-sentiment-balanced/
+│       ├── config.json
+│       ├── pytorch_model.bin
+│       ├── tokenizer.json
+│       ├── tokenizer_config.json
+│       └── ... (остальные файлы модели)
+├── main.py
+├── train_model.py
+├── requirements.txt
+└── ...
+```
+
+---
+
+## Данные
+
+В папку `ready_pipeline/data/raw/` необходимо поместить файлы:
+
+* `candles.csv`
+* `news.csv`
+
+Файлы должны содержать данные **по 8 сентября включительно** (в соответствии с текущим заданием).
+
+---
+
+## Предобученная модель
+
+В директории `ready_pipeline/models/` создайте папку:
+
+```
+rubert-tiny-sentiment-balanced/
+```
+
+Скачайте все исходные файлы предобученной модели по ссылке:
+
+ [cointegrated/rubert-tiny-sentiment-balanced — Hugging Face](https://huggingface.co/cointegrated/rubert-tiny-sentiment-balanced/tree/main)
+
+и поместите их в эту папку.
+
+---
+
+## Установка и запуск
+
+### 1. Установка зависимостей
+
+Убедитесь, что установлена версия **Python 3.11.0**.
+Далее выполните установку зависимостей:
+
+```bash
+pip install -r requirements.txt
+```
+
+Отдельно установите библиотеку **PatchTST** (модель от IBM):
+
+```bash
+pip install git+https://github.com/IBM/tsfm.git
+```
+
+---
+
+### 2. Запуск пайплайна
+
+Запуск возможен:
+
+* либо из папки `ready_pipeline`,
+* либо из корневой директории проекта.
+
+Команда запуска:
+
+```bash
+python main.py
+```
+
+После успешного выполнения скрипта в папке `ready_pipeline` появится файл:
+
+```
+submission.csv
+```
+
+— это финальный результат работы пайплайна.
+
+---
+
+## Дополнительная информация
+
+* Версия Python: **3.11.0**
+* Все зависимости указаны в `requirements.txt`
+* Модель **PatchTST** используется для временных рядов и требует установки из репозитория IBM (см. выше).
+
+---
+
