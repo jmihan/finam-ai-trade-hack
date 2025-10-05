@@ -10,6 +10,5 @@ torch
 transformers
 tqdm
 pyarrow
-pandas_ta
 rapidfuzz
 joblib
