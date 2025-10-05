@@ -10,7 +10,6 @@ import os
 import sys
 
 # --- Блок для корректного импорта ---
-# Позволяет запускать скрипт из любой директории
 try:
     from config import *
     from utils import load_cache, save_cache
@@ -19,7 +18,6 @@ except ImportError:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from config import *
     from utils import load_cache, save_cache
-# --- Конец блока ---
 
 
 def run_nlp_feature_generation():
@@ -46,7 +44,7 @@ def run_nlp_feature_generation():
     # Шаг 5: Агрегация и сохранение
     _aggregate_and_save_features(df_news, df_ticker_matches, df_quant_features, df_rubert_features)
 
-    logging.info("\n✅ Пайплайн генерации NLP признаков успешно завершен!")
+    logging.info("\n Пайплайн генерации NLP признаков успешно завершен!")
     logging.info("="*50)
 
 
@@ -284,10 +282,7 @@ def _aggregate_and_save_features(df_news, df_tickers, df_quant, df_rubert):
     # 4. Объединяем с найденными тикерами
     df_merged = df_merged.merge(df_tickers, on='original_news_id', how='left')
 
-    # --- ТЕПЕРЬ, В САМОМ КОНЦЕ, ДЕЛАЕМ EXPLODE ---
     df_merged = df_merged.explode('identified_tickers').rename(columns={'identified_tickers': 'ticker'}).dropna(subset=['ticker'])
-    
-    # Теперь df_merged готов к агрегации, и он был создан с минимальным потреблением памяти.
 
     # Словарь для агрегации
     agg_dict = {

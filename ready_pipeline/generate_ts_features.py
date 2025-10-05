@@ -11,11 +11,10 @@ try:
 except ImportError:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from config import *
-# --- Конец блока ---
 
 def generate_features_for_group(group: pd.DataFrame) -> pd.DataFrame:
     """
-    Генерирует признаки для одной группы данных (одного тикера), используя только pandas и numpy.
+    Генерирует признаки для одной группы данных (одного тикера).
     """
     df = group.copy()
     
@@ -105,7 +104,6 @@ def run_ts_feature_generation():
     initial_columns = set(df.columns)
 
     processed_groups = []
-    # Используем `tqdm` для отслеживания прогресса
     for ticker, group in tqdm(df.groupby('ticker'), desc="Обработка тикеров"):
         processed_groups.append(generate_features_for_group(group))
 

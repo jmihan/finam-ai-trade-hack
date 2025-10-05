@@ -14,14 +14,13 @@ try:
 except ImportError:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from config import *
-# --- Конец блока ---
 
 def run_prediction():
     """
     Основной пайплайн для получения предсказаний на основе обученной модели.
     """
     logging.info("="*50)
-    logging.info("🚀 Запуск пайплайна предсказания...")
+    logging.info(" Запуск пайплайна предсказания...")
     logging.info("="*50)
 
     # 1. Загрузка модели и артефактов
@@ -77,8 +76,6 @@ def run_prediction():
     
     predictions_for_all_channels = predictions_output.predictions[1]
     predictions_raw = predictions_for_all_channels[:, :, :PREDICTION_LENGTH]
-
-    # --- НОВАЯ ЛОГИКА ДЛЯ СОЗДАНИЯ SUBMISSION С УЧЕТОМ ВЫХОДНЫХ ---
     
     last_known_date = df_full['date'].max()
     tickers_in_order = sorted(df_inference['ticker'].unique())
@@ -113,13 +110,11 @@ def run_prediction():
     # Гарантируем правильный порядок колонок
     final_columns = ['ticker'] + [f'p{i}' for i in range(1, PREDICTION_LENGTH + 1)]
     df_submission = df_submission[final_columns]
-    
-    # --- КОНЕЦ НОВОЙ ЛОГИКИ ---
 
     # Сохраняем итоговый файл
     df_submission.to_csv(SUBMISSION_PATH, index=False)
     
-    logging.info(f"\n✅ Финальный submission-файл успешно сохранен в: {SUBMISSION_PATH}")
+    logging.info(f"\n Финальный submission-файл успешно сохранен в: {SUBMISSION_PATH}")
     logging.info(f"Пример submission-файла (с нулями на выходных):\n{df_submission.head().to_string()}")
 
 

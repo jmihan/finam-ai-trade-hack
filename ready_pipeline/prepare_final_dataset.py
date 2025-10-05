@@ -10,8 +10,6 @@ try:
 except ImportError:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from config import *
-# --- Конец блока ---
-
 
 def create_future_targets(df: pd.DataFrame, horizon: int) -> pd.DataFrame:
     """
@@ -58,7 +56,7 @@ def run_final_dataset_preparation():
     df_ts = df_ts.sort_values(by=['ticker', 'date'])
     df_ts['trade_day_rank'] = df_ts.groupby('ticker').cumcount()
 
-    # --- НОВЫЙ БЛОК: Создание полного календаря и forward fill ---
+    # --- Создание полного календаря и forward fill ---
     all_tickers = df_ts['ticker'].unique()
     full_calendar = pd.date_range(start=df_ts['date'].min(), end=df_ts['date'].max(), freq='D')
     
@@ -70,10 +68,9 @@ def run_final_dataset_preparation():
     df_ts_ranks = df_ts[['ticker', 'date', 'trade_day_rank']]
     df_mapper = pd.merge(df_full_calendar, df_ts_ranks, on=['ticker', 'date'], how='left')
 
-    # КЛЮЧЕВОЙ МОМЕНТ: Заполняем пропуски в выходные последним известным рангом
+    # Заполняем пропуски в выходные последним известным рангом
     df_mapper['trade_day_rank'] = df_mapper.groupby('ticker')['trade_day_rank'].ffill()
     df_mapper.dropna(subset=['trade_day_rank'], inplace=True) # Удаляем дни до начала торгов тикера
-    # --- КОНЕЦ НОВОГО БЛОКА ---
 
     # Присваиваем ранг каждой новости, используя новый полный маппер
     # Используем `merge_asof` для ближайшей предыдущей даты, если точной нет
@@ -86,7 +83,7 @@ def run_final_dataset_preparation():
     # Сдвигаем ранг на +1. Теперь новости с пт, сб, вс указывают на пн.
     df_nlp['trade_day_rank'] += 1
     
-    # --- НОВЫЙ БЛОК: Агрегация новостей, относящихся к одному дню ---
+    # --- Агрегация новостей, относящихся к одному дню ---
     logging.info("---  Агрегация новостей (за выходные и т.д.) ---")
     
     # Определяем, как агрегировать каждую колонку
@@ -100,7 +97,6 @@ def run_final_dataset_preparation():
     agg_funcs.update({col: 'sum' for col in nlp_feature_cols if 'sum' in col or 'count' in col or 'num_news' in col})
     
     df_nlp_agg = df_nlp.groupby(['ticker', 'trade_day_rank']).agg(agg_funcs).reset_index()
-    # --- КОНЕЦ НОВОГО БЛОКА ---
 
     # Добавляем префикс к колонкам NLP, чтобы избежать конфликтов имен
     nlp_cols = [col for col in df_nlp_agg.columns if col not in ['date', 'ticker', 'trade_day_rank']]
@@ -124,13 +120,6 @@ def run_final_dataset_preparation():
     logging.info("--- Шаг 4/4: Создание целевых переменных (таргетов) ---")
     # Используем PREDICTION_LENGTH из конфига
     df_final = create_future_targets(df_final, horizon=PREDICTION_LENGTH)
-    
-    # # Важно: удаляем строки, где мы не смогли рассчитать таргеты (хвост данных)
-    # df_final.dropna(subset=[f'target_return_{PREDICTION_LENGTH}d'], inplace=True)
-    # df_final.reset_index(drop=True, inplace=True)
-
-    # # Сохранение
-    # df_final.to_parquet(FINAL_TRAIN_DF_PATH, index=False)
 
     logging.info("--- Разделение на обучающие и инференс-данные ---")
 

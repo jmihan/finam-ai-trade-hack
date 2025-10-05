@@ -33,7 +33,7 @@ def run_model_training():
     Основной пайплайн для обучения модели PatchTST.
     """
     logging.info("="*50)
-    logging.info("🚀 Запуск пайплайна обучения модели PatchTST...")
+    logging.info(" Запуск пайплайна обучения модели PatchTST...")
     logging.info("="*50)
 
     # 1. Загрузка финального датасета
@@ -88,13 +88,12 @@ def run_model_training():
     )
     preprocessor.train(train_df)
     
-    # --- ИСПРАВЛЕННЫЙ БЛОК СОГЛАСНО HELP() ---
     train_dataset = ForecastDFDataset(
         preprocessor.preprocess(train_df),
         id_columns=["ticker"],
         timestamp_column="date",
-        target_columns=target_columns,       # <--- Здесь ТОЛЬКО таргеты
-        conditional_columns=context_columns, # <--- Здесь ТОЛЬКО признаки
+        target_columns=target_columns,       
+        conditional_columns=context_columns, 
         context_length=CONTEXT_LENGTH,
         prediction_length=PREDICTION_LENGTH,
     )
@@ -102,12 +101,11 @@ def run_model_training():
         preprocessor.preprocess(val_df),
         id_columns=["ticker"],
         timestamp_column="date",
-        target_columns=target_columns,       # <--- Здесь ТОЛЬКО таргеты
-        conditional_columns=context_columns, # <--- Здесь ТОЛЬКО признаки
+        target_columns=target_columns,       
+        conditional_columns=context_columns, 
         context_length=CONTEXT_LENGTH,
         prediction_length=PREDICTION_LENGTH,
     )
-    # --- КОНЕЦ ИСПРАВЛЕНИЙ ---
     logging.info("Препроцессор и датасеты созданы.")
 
     # 5. Конфигурация модели и Trainer'а
@@ -118,11 +116,10 @@ def run_model_training():
     
     config = PatchTSTConfig(
         # Модель ожидает общее количество каналов
-        num_input_channels=num_total_channels, # <--- Корректное значение
+        num_input_channels=num_total_channels, 
         context_length=CONTEXT_LENGTH,
         prediction_length=PREDICTION_LENGTH,
-        # Количество каналов, которые являются таргетами. Модель будет предсказывать только их.
-        num_output_channels=len(target_columns), # <--- Важный параметр для разделения
+        num_output_channels=len(target_columns), 
         patch_length=PATCH_LENGTH,
         patch_stride=PATCH_LENGTH,
         d_model=D_MODEL,
