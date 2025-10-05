@@ -22,3 +22,5 @@ checkpoints/
 *.csv
 *.png
 *.parquet
+*.pptx
+*.docx

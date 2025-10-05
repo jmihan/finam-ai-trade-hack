@@ -158,7 +158,7 @@ def run_model_training():
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=EARLY_STOPPING_PATIENCE)],
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=EARLY_STOPPING_PATIENCE)],    
     )
     logging.info("Конфигурация завершена. Начинаем обучение...")
 
