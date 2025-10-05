@@ -109,3 +109,6 @@ submission.csv
 
 ---
 
+Ссылка на обученную модель:
+https://drive.google.com/file/d/1TGmKABRpNX9ot9nJlwTx59DIw2D5Arfg/view?usp=sharing
+
